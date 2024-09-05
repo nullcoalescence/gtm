@@ -1,4 +1,6 @@
 
+using gtm.Db;
+
 namespace gtm
 {
     public class Program
@@ -13,6 +15,12 @@ namespace gtm
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Entity framework
+            builder.Services.AddDbContext<GtmContext>();
+
+            // Logging
+
 
             var app = builder.Build();
 
