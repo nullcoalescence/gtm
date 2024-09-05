@@ -10,8 +10,8 @@ namespace gtm.Controllers
     [ApiController]
     public class DeckController : ControllerBase
     {
-        ILogger<DeckController> _logger;
-        GtmContext _dbContext;
+        private readonly ILogger<DeckController> _logger;
+        private readonly GtmContext _dbContext;
 
         public DeckController(ILogger<DeckController> logger, GtmContext dbContext)
         {
@@ -22,7 +22,7 @@ namespace gtm.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<DeckDto.ResponseDto>> Get([FromQuery] DeckSearch search)
         {
-            var decks = _dbContext.Decks
+            var deck = _dbContext.Decks
                 .Where(deck =>
                     (search.Id == null || deck.Id == search.Id)
                     && (search.Name == null || deck.Name.ToLower().Equals(search.Name.ToLower())))
@@ -34,12 +34,12 @@ namespace gtm.Controllers
                 })
                 .AsEnumerable();
 
-            return Ok(decks);
+            return Ok(deck);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<DeckDto.ResponseDto> GetById(int id)
+        public ActionResult<DeckDto.ResponseDto> GetById([FromRoute] int id)
         {
             var deck = _dbContext.Decks
                 .Where(deck => deck.Id == id)
