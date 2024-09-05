@@ -1,11 +1,12 @@
 
 using gtm.Db;
+using Microsoft.EntityFrameworkCore;
 
 namespace gtm
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,8 @@ namespace gtm
             builder.Services.AddDbContext<GtmContext>();
 
             // Logging
-
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
             var app = builder.Build();
 
@@ -37,6 +39,24 @@ namespace gtm
 
 
             app.MapControllers();
+
+            // Migrate database on startup
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    app.Logger.LogInformation("Running database migrations");
+
+                    var dbContext = scope.ServiceProvider.GetRequiredService<GtmContext>();
+                    await dbContext.Database.MigrateAsync();
+
+                    app.Logger.LogInformation("Completed database migrations");
+                } catch (Exception ex)
+                {
+                    app.Logger.LogError("Database migrations failed");
+                    app.Logger.LogError($"{ex.Message}");
+                }
+            }
 
             app.Run();
         }
