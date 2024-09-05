@@ -6,6 +6,7 @@ namespace gtm.Db
     public class GtmContext : DbContext
     {
         public DbSet<Deck> Decks { get; set; }
+        public DbSet<Card> Cards { get; set; }
 
         public string DbPath { get; set; }
 

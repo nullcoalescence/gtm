@@ -1,6 +1,7 @@
 
 using gtm.Db;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace gtm
 {
@@ -15,7 +16,11 @@ namespace gtm
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.CustomSchemaIds(s => s.FullName.Replace("+", "."));
+
+            });
 
             // Entity framework
             builder.Services.AddDbContext<GtmContext>();
