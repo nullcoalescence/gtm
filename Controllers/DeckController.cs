@@ -1,8 +1,7 @@
 ﻿using gtm.Db;
+using gtm.Db.Models;
 using gtm.Dto;
 using gtm.Searches;
-using gtm.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace gtm.Controllers
@@ -21,10 +20,10 @@ namespace gtm.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<DeckDto.ResponseDto>> Get([FromRoute] DeckSearch search)
+        public ActionResult<IEnumerable<DeckDto.ResponseDto>> Get([FromQuery] DeckSearch search)
         {
             var decks = _dbContext.Decks
-                .Where(deck => 
+                .Where(deck =>
                     (search.Id == null || deck.Id == search.Id)
                     && (search.Name == null || deck.Name.ToLower().Equals(search.Name.ToLower())))
                 .Select(d => new DeckDto.ResponseDto()
@@ -54,5 +53,66 @@ namespace gtm.Controllers
             return Ok(deck);
         }
 
+        [HttpPost]
+        public ActionResult<DeckDto.ResponseDto> Post([FromBody] DeckDto.RequestDto request)
+        {
+            var deck = new Deck()
+            {
+                Name = request.Name,
+                Description = request.Description
+            };
 
+            var added = _dbContext.Decks.Add(deck).Entity;
+            _dbContext.SaveChanges();
+
+            return new DeckDto.ResponseDto()
+            {
+                Id = added.Id,
+                Name = added.Name,
+                Description = added.Description
+            };
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public ActionResult<DeckDto.ResponseDto> Put([FromRoute] int id, [FromBody] DeckDto.RequestDto request)
+        {
+            var toUpdate = _dbContext.Decks
+                .Where(deck => deck.Id == id)
+                .First();
+
+            if (toUpdate == null)
+            {
+                return NotFound();
+            }
+
+            toUpdate.Name = request.Name;
+            toUpdate.Description = request.Description;
+
+            _dbContext.Decks.Update(toUpdate);
+            _dbContext.SaveChanges();
+
+            return Ok(toUpdate);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public ActionResult Delete([FromRoute] int id)
+        {
+            var toDelete = _dbContext.Decks
+                .Where(deck => deck.Id == id)
+                .First();
+
+            if (toDelete == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.Decks.Remove(toDelete);
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+    }
 }
